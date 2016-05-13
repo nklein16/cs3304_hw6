@@ -1,0 +1,113 @@
+// CS 3304 - Data Structures with Dr. Gayler
+// Nathaniel Klein
+// Assignment 6 - Stacks: Problem #17, p.392
+// Completed: 03/03/16
+//
+// FILE: sequence4.template
+// TEMPLATE CLASS IMPLEMENTED: sequence<T> (see sequence4.h for documentation)
+// This file is included in the header file, and not compiled separately.
+// INVARIANT for the sequence class:
+//   1. The items in the sequence are stored in two distinct stacks, with the
+//      bottom of the first stack as the beginning of the sequence.
+//   2. The elements of the sequence continue up to the top of the first stack.
+//   3. The next element of the sequence is then the top of the second stack.
+//   4. The elements of the sequence then continue down to the bottom of the second sequence.
+//   5. If there is a current element, then that element is at the top of the second stack.
+//   6. The private member variables "first" and "second" represent the two stacks that are used
+//      to store and manipulate the sequence.
+
+/* Note: Professor Gayler explicitly recommended that we operate with the understanding
+ * that the current element is to be found at the top of the second stack rather than
+ * at the top of the first stack, as indicated in the problem in the book. 
+ */
+ 
+/* All functions take constant time except for the start function, which takes linear time due to
+ * the need in the worst-case scenario to move all items from the first stack to the second stack.
+ * Technically, the insert function also takes linear time, but that's because it calls the start
+ * function.
+ */
+
+#include <cassert>  // Provides ability to assert
+
+using namespace std;
+
+namespace stack_sequence_4
+{
+    template <typename T>
+    sequence<T>::sequence()
+    {
+        stack<T> first;
+        stack<T> second;
+    }
+
+    template <typename T>
+    void sequence<T>::start()
+    {
+        if(first.empty() && second.empty())
+            return;
+            
+        while(!first.empty()){
+            second.push(first.top());
+            first.pop();
+        }
+    }
+
+    template <typename T>
+    void sequence<T>::advance()
+    // Library facilities used: cassert
+    {
+        assert(is_item());
+        first.push(second.top());   // Top item from second stack and push it onto first stack
+        second.pop();               // Pop item off second stack
+        
+        if(second.empty())
+            return;
+    }
+
+    template <typename T>
+    void sequence<T>::insert(const T& entry)
+    {
+        // If statement guarantees insertion at front of sequence when there's nothing 
+        // in the second stack but the sequence is not empty by calling the start method
+        if(second.empty() && !(first.empty()))
+            start();
+        second.push(entry);
+    }
+ 
+    template <typename T>
+    void sequence<T>::attach(const T& entry)
+    {
+        if(!second.empty())
+            advance();              // Advance moves current item off the second stack and onto
+                                    // the first stack, then pops item off second stack
+        second.push(entry);         // Push entry onto second stack
+    }
+
+    template <typename T>
+    void sequence<T>::remove_current()
+    // Library facilities used: cassert
+    {
+            assert(is_item());
+            second.pop();
+    }
+    
+    template <typename T>
+    size_t sequence<T>::size( ) const
+    {
+        return (first.size() + second.size());
+    }
+
+    template <typename T>
+    bool sequence<T>::is_item( ) const
+    {
+        return (!second.empty());
+    }
+
+    template <typename T>
+    T sequence<T>::current( ) const
+    // Library facilities used: cassert
+    {
+        assert(is_item());
+        return second.top();
+    }
+}
